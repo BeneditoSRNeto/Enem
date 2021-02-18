@@ -19,12 +19,12 @@
     let barsRect, barScales;
     let scatterCircles, scatterScales;
     let raw_geo_data;
-
+    let color = d3.scaleOrdinal(d3.schemeCategory10);
     function drawMap(svgMap, geo_data) {
 
         let projection = d3.geoMercator()
                 .scale(250)
-                .center([30, -47]); // center of projection
+                .center([30, -27]); // center of projection
 
         let path = d3.geoPath().projection(projection);
 
@@ -32,20 +32,101 @@
             .data(geo_data.features) // draw feature by feature, do not load all feature collection
             .join("path")
                 .attr("d", d => path(d)) // draw feature by feature
-                .attr("fill", "teal")
+                .attr("fill", "#deebf7")
                 .attr("stroke", "black")
                 .attr("stroke-width", 1)
+                .text(function (d) {
+                return d.properties.UF_05;
+            })
                 .on("click", function(e, d) {
                     handleSelection(d.properties.UF_05); // delegate event
                 });
     }
 
-    function drawBars(svgBars, scales, data) {
-        let xBars = scales.x;
-        let yBars = scales.y;
+    //function drawBars(svgBars, scales, data) {
+    //    let xBars = scales.x;
+    //    let yBars = scales.y;
 
 
-        let x_axis = d3.axisBottom(xBars);
+      //  let x_axis = d3.axisBottom(xBars);
+
+      //          d3.select("svg")
+      //          .append("g")
+      //          .attr("class", "x axis")
+      //          .attr("transform", "translate(0," + (height - margin) + ")")
+      //          .call(x_axis);
+
+      //  let y_axis = d3.axisLeft(yBars);
+
+        //        d3.select("svg")
+         //       .append("g")
+         //       .attr("class", "y axis")
+          //      .attr("transform", "translate(" + (margin) + ",0)")
+          //      .call(y_axis);
+
+
+// let grouped = d3.rollup(data, 
+     //               function(group) {
+      //                  let mediaRedacao = d3.mean(group, g => +g["NotaRedacao"]);
+                       
+                        
+              //          return { 
+               //             "NotaRedacao" : mediaRedacao
+                            
+                //        }
+                //    },
+           //         d => d.UfResidencia
+          //      );
+
+//console.log(grouped)
+
+    //    barsRect = svgBars.selectAll("rect")
+    //        .data(grouped)
+    //        .join("rect")
+    //            .attr("x",d => xBars(d))
+    ////            .attr("y", d => height - yBars(d.NotaRedacao))
+    //            .attr("width", (width/2 - margin)/data.length+20)
+    ///            .attr("height", d => yBars(d.NotaRedacao))
+     //           .style("fill","teal")
+    //            .style("stroke","black")
+    //            .on("click", function(e, d) { 
+     //               handleSelection(d.UfResidencia); // delegate event
+     //           })
+      //          ;
+
+
+
+
+
+  //  }
+
+    function drawScatter(svgScatterplot, scales, data) {
+        let xScatter = scales.x;
+        let yScatter = scales.y;
+
+let color = d3.scaleOrdinal(d3.schemeCategory10);
+
+         let attendance_extent = d3.extent(data, d => d.NotaRedacao );
+                let radius_scale = d3.scaleLinear()
+                    .domain(attendance_extent)
+                    .range([1,15]);
+
+
+        scatterCircles = svgScatterplot.selectAll("circle")
+            .data(data)
+          .join("circle")
+              .attr("cx",d => xScatter(d.NotaComp1))
+            .attr("cy", d => yScatter(d.NotaComp2))
+                .attr("r", d => radius_scale(d.NotaRedacao))
+
+              .style("fill",function (d) { return color(d.CorRaca); })
+            .style("stroke","black")
+          .on("click", function(e, d) {          
+            handleSelection(d.UfResidencia); // delegate event
+      });
+
+
+ let x_axis = d3.axisBottom(xScatter);
 
                 d3.select("svg")
                 .append("g")
@@ -53,71 +134,31 @@
                 .attr("transform", "translate(0," + (height - margin) + ")")
                 .call(x_axis);
 
-        let y_axis = d3.axisLeft(yBars);
+        let y_axis = d3.axisLeft(yScatter);
 
-                d3.select("svg")
-                .append("g")
-                .attr("class", "y axis")
-                .attr("transform", "translate(" + (margin) + ",0)")
-                .call(y_axis);
-
-
-
-
-
-
-        barsRect = svgBars.selectAll("rect")
-            .data(data)
-            .join("rect")
-                .attr("x",d => xBars(d.NotaRedacao))
-                .attr("y", d => height - yBars(d.NotaRedacao))
-                .attr("width", (width/2 - margin)/data.length+20)
-                .attr("height", d => yBars(d.NotaRedacao))
-                .style("fill","teal")
-                .style("stroke","black")
-                .on("click", function(e, d) { 
-                    handleSelection(d.UfResidencia); // delegate event
-                })
-                ;
+              d3.select("svg")
+             .append("g")
+             .attr("class", "y axis")
+            .attr("transform", "translate(" + (margin) + ",0)")
+            .call(y_axis);
 
 
 
 
 
-    }
-
-    function drawScatter(svgScatterplot, scales, data) {
-        let xScatter = scales.x;
-        let yScatter = scales.y;
-
-
-
-        
-        scatterCircles = svgScatterplot.selectAll("circle")
-            .data(data)
-            .join("circle")
-                .attr("cx",d => xScatter(d.StatusRedacao))
-                .attr("cy", d => yScatter(d.NotaRedacao))
-                .attr("r", d => Math.sqrt(height - yScatter(d.NotaRedacao)))
-
-                .style("fill","teal")
-                .style("stroke","black")
-                .on("click", function(e, d) {          
-                    handleSelection(d.UfResidencia); // delegate event
-                });
-    }
+ }
 
     function handleSelection(key) {
         
         // reset visual display
-        mapPaths.style("fill","teal");
-        scatterCircles.style("fill","teal");           
-        barsRect.style("fill","teal");
+        mapPaths.style("fill","#deebf7");
+        scatterCircles.style("fill",function (d) { return color(d.CorRaca); });           
+       // barsRect.style("fill","teal");
 
         // using filter it is possible to get the selection by the key
         mapPaths.filter(d => d.properties.UF_05 === key).style("fill","red");
         scatterCircles.filter(d => d.UfResidencia === key).style("fill","red");
-        barsRect.filter(d => d.UfResidencia === key).style("fill","red");
+        //barsRect.filter(d => d.UfResidencia === key).style("fill","red");
     }
 
 
@@ -128,16 +169,16 @@ console.log(data)
         // bars setup
          
 
-        let svgBars = d3.select("body").append("svg")
-            .attr("width", width)
-            .attr("height", height);
-        let xBars = d3.scaleBand()
-            .rangeRound([margin, width-margin])
-            .domain(data.map(d => d.NotaRedacao));
-        let yBars = d3.scaleLinear()
-            .range([height - margin, margin])
-            .domain([0,d3.max(data, d=>d.NotaRedacao)]);
-        barScales = {"x":xBars, "y":yBars};
+      //  let svgBars = d3.select("body").append("svg")
+        //    .attr("width", width)
+          //  .attr("height", height);
+        //let xBars = d3.scaleBand()
+          //  .rangeRound([margin, width-margin])
+           // .domain(data.map(d => d.NotaRedacao));
+        //let yBars = d3.scaleLinear()
+          //  .range([height - margin, margin])
+         //   .domain([0,d3.max(data, d=>d.NotaRedacao)]);
+        //barScales = {"x":xBars, "y":yBars};
 
         
         
@@ -149,17 +190,17 @@ console.log(data)
             .attr("height", height);
         let xScatter = d3.scaleLinear()
             .rangeRound([margin, width-margin])
-            .domain([d3.max(data, d=>d.StatusRedacao),0]);
+            .domain([0,d3.max(data, d=>d.NotaComp1)]);
         let yScatter = d3.scaleLinear()
             .range([height - margin, margin])
-            .domain([d3.max(data, d=>d.NotaRedacao),0]);
+            .domain([0,d3.max(data, d=>d.NotaComp2)]);
         scatterScales = {"x":xScatter, "y": yScatter}
         
         
 
        
-        drawBars(svgBars, barScales, data);
-        drawScatter(svgScatterplot, scatterScales, data);
+       // drawBars(svgBars, barScales, data);
+       drawScatter(svgScatterplot, scatterScales, data);
 
 
 
@@ -183,7 +224,7 @@ console.log(data)
             .on("input", function(e, d) {
                 label.text(this.value); // use `this` on the place of slider 
                 let dataFiltered = data.filter(d => d.Ano > this.value); // filter using value
-                drawBars(svgBars, barScales, dataFiltered);
+               // drawBars(svgBars, barScales, dataFiltered);
                 drawScatter(svgScatterplot, scatterScales, dataFiltered);
                 
                 // get names from filtered data and update features

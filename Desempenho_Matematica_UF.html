@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .bar {
+            fill: steelblue;
+        }
+
+        .highlight {
+            fill: orange;
+        }
+</style>
+    <script type="text/javascript" src="../d3.js"></script>
+<script>
+
+   function vis1(data){
+var svg = d3.select("#p1"),
+        margin = 200,
+        width = svg.attr("width") - margin,
+        height = svg.attr("height") - margin;
+
+    svg.append("text")
+       .attr("transform", "translate(100,0)")
+       .attr("x", 50)
+       .attr("y", 50)
+       .attr("font-size", "24px")
+       .text("Desempenho por UF ")
+
+    var x = d3.scaleBand().range([0, width]).padding(0.4),
+        y = d3.scaleLinear().range([height, 0]);
+
+    var g = svg.append("g")
+            .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+
+        x.domain(data.map(function(d) { return d.UfResidencia; }));
+        y.domain([0, d3.max(data, function(d) { return d.NotaMt; })]);
+
+        g.append("g")
+         .attr("transform", "translate(0," + height + ")")
+         .call(d3.axisBottom(x))
+         .append("text")
+         .attr("y", height - 250)
+         .attr("x", width - 100)
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Unida Federativa");
+
+        g.append("g")
+         .call(d3.axisLeft(y).tickFormat(function(d){
+             return  d;
+         }).ticks(10))
+         .append("text")
+         .attr("transform", "rotate(-90)")
+         .attr("y", 6)
+         .attr("dy", "-5.1em")
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Notas em Matemática");
+
+let color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        g.selectAll(".bar")
+         .data(data)
+         .enter().append("rect")
+         .attr("class", "bar")
+         .style("fill",function (d) { return color(d.CorRaca); })
+         .attr("x", function(d) { return x(d.UfResidencia); })
+         .attr("y", function(d) { return y(d.NotaMt); })
+         .attr("width", x.bandwidth())
+         //.transition()
+         //.ease(d3.easeLinear)
+         //.duration(100)
+        // .delay(function (d, i) {return i * 10; })
+         .attr("height", function(d) { return height - y(d.NotaMt); });
+    
+
+
+   }
+    function vis2(data){
+
+     var svg = d3.select("#p2"),
+        margin = 200,
+        width = svg.attr("width") - margin,
+        height = svg.attr("height") - margin;
+
+    svg.append("text")
+       .attr("transform", "translate(100,0)")
+       .attr("x", 50)
+       .attr("y", 50)
+       .attr("font-size", "24px")
+       .text("Desempenho por ano de aplicação")
+
+    var x = d3.scaleBand().range([0, width]).padding(0.4),
+        y = d3.scaleLinear().range([height, 0]);
+
+    var g = svg.append("g")
+            .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+
+        x.domain(data.map(function(d) { return d.Ano; }));
+        y.domain([0, d3.max(data, function(d) { return d.NotaMt; })]);
+
+        g.append("g")
+         .attr("transform", "translate(0," + height + ")")
+         .call(d3.axisBottom(x))
+         .append("text")
+         .attr("y", height - 250)
+         .attr("x", width - 100)
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Anos");
+
+        g.append("g")
+         .call(d3.axisLeft(y).tickFormat(function(d){
+             return  d;
+         }).ticks(10))
+         .append("text")
+         .attr("transform", "rotate(-90)")
+         .attr("y", 6)
+         .attr("dy", "-5.1em")
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Notas em Matemática");
+
+let color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        g.selectAll(".bar")
+         .data(data)
+         .enter().append("rect")
+         .attr("class", "bar")
+         .style("fill",function (d) { return color(d.CorRaca); })
+         .attr("x", function(d) { return x(d.Ano); })
+         .attr("y", function(d) { return y(d.NotaMt); })
+         .attr("width", x.bandwidth())
+         //.transition()
+         //.ease(d3.easeLinear)
+         //.duration(100)
+        // .delay(function (d, i) {return i * 10; })
+         .attr("height", function(d) { return height - y(d.NotaMt); });
+    
+
+   }
+
+
+   function vis3(data){
+
+     var svg = d3.select("#p3"),
+        margin = 200,
+        width = svg.attr("width") - margin,
+        height = svg.attr("height") - margin;
+
+    svg.append("text")
+       .attr("transform", "translate(100,0)")
+       .attr("x", 50)
+       .attr("y", 50)
+       .attr("font-size", "24px")
+       .text("Desempenho por Idade ")
+
+    var x = d3.scaleBand().range([0, width]).padding(0.4),
+        y = d3.scaleLinear().range([height, 0]);
+
+    var g = svg.append("g")
+            .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+
+        x.domain(data.map(function(d) { return d.Idade; }));
+        y.domain([0, d3.max(data, function(d) { return d.NotaMt; })]);
+
+        g.append("g")
+         .attr("transform", "translate(0," + height + ")")
+         .call(d3.axisBottom(x))
+         .append("text")
+         .attr("y", height - 250)
+         .attr("x", width - 100)
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Idades");
+
+        g.append("g")
+         .call(d3.axisLeft(y).tickFormat(function(d){
+             return  d;
+         }).ticks(10))
+         .append("text")
+         .attr("transform", "rotate(-90)")
+         .attr("y", 6)
+         .attr("dy", "-5.1em")
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Notas em Matemática");
+
+let color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        g.selectAll(".bar")
+         .data(data)
+         .enter().append("rect")
+         .attr("class", "bar")
+         .style("fill",function (d) { return color(d.CorRaca); })
+         .attr("x", function(d) { return x(d.Idade); })
+         .attr("y", function(d) { return y(d.NotaMt); })
+         .attr("width", x.bandwidth())
+         //.transition()
+         //.ease(d3.easeLinear)
+         //.duration(100)
+        // .delay(function (d, i) {return i * 10; })
+         .attr("height", function(d) { return height - y(d.NotaMt); });
+    
+
+   }
+
+
+    function setupVis(data)
+    {
+        console.log(data)
+vis2(data)
+vis1(data)
+vis3(data)
+         
+    }
+
+</script>
+</head>
+<body>
+<svg id="p1" width="600" height="500"></svg>
+<svg id="p2" width="600" height="500"></svg>
+<svg id="p3" width="600" height="500"></svg>
+<script type="text/javascript">
+     d3.dsv(";", "ENEM_full.csv")
+            .then(setupVis)
+            .catch(err => {console.log(err)})
+</script>
+</body>
+</html>
