@@ -2,13 +2,16 @@
 <html>
 
 <head>
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+
     <meta charset="utf-8">
 	<script type="text/javascript" src="../d3.js"></script>
     
     <script type="text/javascript">
     
-    let width = 350,
-        height = 300,
+    let width = 550,
+        height = 400,
         margin = 50;
     
     // save state of visual variables to brush and filter
@@ -20,8 +23,8 @@
     function drawMap(svgMap, geo_data) {
 
         let projection = d3.geoMercator()
-                .scale(160)
-                .center([80, -17]); // center of projection
+                .scale(250)
+                .center([30, -47]); // center of projection
 
         let path = d3.geoPath().projection(projection);
 
@@ -41,34 +44,66 @@
         let xBars = scales.x;
         let yBars = scales.y;
 
+
+        let x_axis = d3.axisBottom(xBars);
+
+                d3.select("svg")
+                .append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + (height - margin) + ")")
+                .call(x_axis);
+
+        let y_axis = d3.axisLeft(yBars);
+
+                d3.select("svg")
+                .append("g")
+                .attr("class", "y axis")
+                .attr("transform", "translate(" + (margin) + ",0)")
+                .call(y_axis);
+
+
+
+
+
+
         barsRect = svgBars.selectAll("rect")
             .data(data)
             .join("rect")
-                .attr("x",d => xBars(d.nome))
-                .attr("y", d => height - yBars(d.staff))
-                .attr("width", (width/2 - margin)/data.length)
-                .attr("height", d => yBars(d.staff))
+                .attr("x",d => xBars(d.Idade))
+                .attr("y", d => height - yBars(d.Idade))
+                .attr("width", (width/2 - margin)/data.length+20)
+                .attr("height", d => yBars(d.Idade))
                 .style("fill","teal")
                 .style("stroke","black")
                 .on("click", function(e, d) { 
-                    handleSelection(d.nome); // delegate event
-                });
+                    handleSelection(d.UfResidencia); // delegate event
+                })
+                ;
+
+
+
+
+
     }
 
     function drawScatter(svgScatterplot, scales, data) {
         let xScatter = scales.x;
         let yScatter = scales.y;
 
+
+
+        
         scatterCircles = svgScatterplot.selectAll("circle")
             .data(data)
             .join("circle")
-                .attr("cx",d => xScatter(d.undergrad))
-                .attr("cy", d => yScatter(d.postgrad))
-                .attr("r", width/20)
+                .attr("cx",d => xScatter(d.Idade))
+                .attr("cy", d => yScatter(d.NotaRedacao))
+                .attr("r", d => Math.sqrt(height - yScatter(d.NotaRedacao)))
+
                 .style("fill","teal")
                 .style("stroke","black")
                 .on("click", function(e, d) {          
-                    handleSelection(d.nome); // delegate event
+                    handleSelection(d.UfResidencia); // delegate event
                 });
     }
 
@@ -81,8 +116,8 @@
 
         // using filter it is possible to get the selection by the key
         mapPaths.filter(d => d.properties.UF_05 === key).style("fill","red");
-        scatterCircles.filter(d => d.nome === key).style("fill","red");
-        barsRect.filter(d => d.nome === key).style("fill","red");
+        scatterCircles.filter(d => d.UfResidencia === key).style("fill","red");
+        barsRect.filter(d => d.UfResidencia === key).style("fill","red");
     }
 
 
@@ -91,17 +126,21 @@
 console.log(data)
         // -----------------
         // bars setup
+         
+
         let svgBars = d3.select("body").append("svg")
             .attr("width", width)
             .attr("height", height);
         let xBars = d3.scaleBand()
             .rangeRound([margin, width-margin])
-            .domain(data.map(d => d.nome));
+            .domain(data.map(d => d.Idade));
         let yBars = d3.scaleLinear()
             .range([height - margin, margin])
-            .domain([d3.max(data, d=>d.staff),0]);
+            .domain([0,d3.max(data, d=>d.Idade)]);
         barScales = {"x":xBars, "y":yBars};
 
+        
+        
 
         // -----------------
         // scatterplot setup
@@ -110,24 +149,32 @@ console.log(data)
             .attr("height", height);
         let xScatter = d3.scaleLinear()
             .rangeRound([margin, width-margin])
-            .domain([0,d3.max(data, d=>d.undergrad)]);
+            .domain([d3.max(data, d=>d.Idade),0]);
         let yScatter = d3.scaleLinear()
             .range([height - margin, margin])
-            .domain([d3.max(data, d=>d.postgrad),0]);
+            .domain([d3.max(data, d=>d.NotaRedacao),0]);
         scatterScales = {"x":xScatter, "y": yScatter}
         
-        console.log(data)
+        
+
+       
         drawBars(svgBars, barScales, data);
         drawScatter(svgScatterplot, scatterScales, data);
 
+
+
         // ---------------
+
+
+
+
         // added for filtering
         raw_data = data; 
         let slider = d3.select("#filter_slider");
         let label = d3.select("#label");
 
-        let min = 0, 
-            max = d3.max(raw_data,d => d.events) + 10;
+        let min = 2017, 
+            max = d3.max(raw_data,d => d.Ano) ;
         slider
             .attr("min", min)
             .attr("max", max)
@@ -135,15 +182,15 @@ console.log(data)
             .attr("step", 1)
             .on("input", function(e, d) {
                 label.text(this.value); // use `this` on the place of slider 
-                let dataFiltered = data.filter(d => d.events > this.value); // filter using value
+                let dataFiltered = data.filter(d => d.Ano > this.value); // filter using value
                 drawBars(svgBars, barScales, dataFiltered);
                 drawScatter(svgScatterplot, scatterScales, dataFiltered);
                 
                 // get names from filtered data and update features
-                let keys = dataFiltered.map(d => d.name);
+                let keys = dataFiltered.map(d => d.UfResidencia);
                 let geo_data_filtered = JSON.parse(JSON.stringify(raw_geo_data)); // deep copy of object
                 geo_data_filtered.features = raw_geo_data.features.filter(d => {
-                    return keys.includes(d.properties.name); // filter by names
+                    return keys.includes(d.properties.UF_05); // filter by names
                 })
                 drawMap(svgMap, geo_data_filtered);
                 handleSelection({})
@@ -152,20 +199,30 @@ console.log(data)
     </script>
 </head>
 <body>
+        
 
     <div id="filter_container">
         <label>Events: <input type="range" id="filter_slider"/> </label>
         <p id="label"> </p>
     </div>
 
+    <div class="mapa_brasil"></div>
+
+
+
+  
+
     <script type="text/javascript">
+
+
+
         // load and draw map
         d3.json("uf.json")
             .then(data => {
                 raw_geo_data = data;
 
                 // create svg for map
-                svgMap = d3.select("body").append("svg")
+                svgMap = d3.select(".mapa_brasil").append("svg")
                             .attr("width", width)
                             .attr("height", height);
 
@@ -174,9 +231,17 @@ console.log(data)
             .catch(err => {console.log(err)})
         
         // load and draw all vis
-        d3.csv("ENEM_new.csv")
+        d3.dsv(";", "ENEM_full.csv")
             .then(setupVis)
             .catch(err => {console.log(err)})
-    </script>    
+
+
+
+            ///------------------------------
+
+
+    </script>  
+
+  
 </body>
 </html>
