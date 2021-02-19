@@ -12,6 +12,53 @@
 </style>
     <script type="text/javascript" src="../d3.js"></script>
 <script>
+    var keys = [ "Branca", "Preta", "Parda", "Amarela","Indígena ","Não declarado"]
+
+
+
+
+function vis4(data){
+let color = d3.scaleOrdinal(d3.schemeCategory10);
+// select the svg area
+var Svg = d3.select("#legenda")
+
+// create a list of keys
+
+// Usually you have a color scale in your chart already
+
+
+// Add one dot in the legend for each name.
+Svg.selectAll("#legenda")
+  .data(keys)
+  .enter()
+  .append("circle")
+    .attr("cx", 100)
+    .attr("cy", function(d,i){ return 100 + i*25}) // 100 is where the first dot appears. 25 is the distance between dots
+    .attr("r", 7)
+    .style("fill", function(d){ return color(d)})
+
+// Add one dot in the legend for each name.
+Svg.selectAll("#legenda")
+  .data(keys)
+  .enter()
+  .append("text")
+    .attr("x", 120)
+    .attr("y", function(d,i){ return 100 + i*25}) // 100 is where the first dot appears. 25 is the distance between dots
+    .style("fill", function(d){ return color(d)})
+    .text(function(d){ return d})
+    .attr("text-anchor", "left")
+    .style("alignment-baseline", "middle")
+
+     Svg.append("text")
+       .attr("transform", "translate(100,0)")
+       .attr("x", 50)
+       .attr("y", 50)
+       .attr("font-size", "24px")
+       .text("Legenda ")
+
+}
+//__________________________________________________________________
+
 
    function vis1(data){
 var svg = d3.select("#p1"),
@@ -64,7 +111,7 @@ let color = d3.scaleOrdinal(d3.schemeCategory10);
          .data(data)
          .enter().append("rect")
          .attr("class", "bar")
-         .style("fill",function (d) { return color(d.CorRaca); })
+         .style("fill",function (d) { return color(d.CorRaca);  })
          .attr("x", function(d) { return x(d.UfResidencia); })
          .attr("y", function(d) { return y(d.NotaMt); })
          .attr("width", x.bandwidth())
@@ -215,15 +262,23 @@ let color = d3.scaleOrdinal(d3.schemeCategory10);
 vis2(data)
 vis1(data)
 vis3(data)
+vis4(data)
          
     }
 
 </script>
 </head>
 <body>
+
+    <h1>Qual o Desempenho dos participantes do Exame nacional do ensino médio no Eixo Matematica e suas tecnologias?  </h1>
 <svg id="p1" width="600" height="500"></svg>
+ <svg id="legenda" height=300 width=450></svg>
 <svg id="p2" width="600" height="500"></svg>
 <svg id="p3" width="600" height="500"></svg>
+
+
+ 
+
 <script type="text/javascript">
      d3.dsv(";", "ENEM_full.csv")
             .then(setupVis)
