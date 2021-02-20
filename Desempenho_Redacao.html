@@ -13,7 +13,7 @@
     <script type="text/javascript" src="../d3.js"></script>
 <script>
     var keys = [ "Branca", "Preta", "Parda", "Amarela","Indígena ","Não declarado"]
-let mapPaths,Vis2,Vis3;
+let mapPaths,Vis2,Vis3, Vis6,rawdata;
 
 
 
@@ -64,12 +64,16 @@ function handleSelection(key) {
         // reset visual display  "#deebf7"
         mapPaths.style("fill","#deebf7");
        Vis3.style("fill",function (d) { return color(d.CorRaca); });           
-       Vis2.style("fill",function (d) { return color(d.CorRaca); });
+       Vis2.style("fill",function (d) { return color(d.CorRaca);  });
+       Vis6.style("fill",function (d) { return color(d.CorRaca);  });
+       
 
         // using filter it is possible to get the selection by the key
         mapPaths.filter(d => d.properties.UF_05 === key).style("fill","red");
       Vis2.filter(d => d.UfResidencia === key).style("fill","red");
         Vis3.filter(d => d.UfResidencia === key).style("fill","red");
+       Vis6.filter(d => d.UfResidencia === key).style("fill","red");
+       
     }
 
    function vis1(data){
@@ -101,12 +105,16 @@ let projection = d3.geoMercator()
                 .attr("stroke", "black")
                 .attr("stroke-width", 1)
                 .on("click", function(e, d) {
-                    handleSelection(d.properties.UF_05); // delegate event
+                    handleSelection(d.properties.UF_05);
+                
+
+
                 });
 
    }
     function vis2(data){
 
+d3.select("#p2").selectAll("*").remove();
      var svg = d3.select("#p2"),
         margin = 200,
         width = svg.attr("width") - margin,
@@ -174,7 +182,7 @@ let color = d3.scaleOrdinal(d3.schemeCategory10);
 
 
    function vis3(data){
-
+d3.select("#p3").selectAll("*").remove();
      var svg = d3.select("#p3"),
         margin = 200,
         width = svg.attr("width") - margin,
@@ -241,14 +249,85 @@ let color = d3.scaleOrdinal(d3.schemeCategory10);
 
    }
 
+function vis6(data){
+ var svg = d3.select("#p6"),
+        margin = 200,
+        width = svg.attr("width") - margin,
+        height = svg.attr("height") - margin;
+
+    svg.append("text")
+       .attr("transform", "translate(100,0)")
+       .attr("x", 50)
+       .attr("y", 50)
+       .attr("font-size", "24px")
+       .text("Desempenho na Redação X Linguagens")
+
+    var x = d3.scaleLinear().range([0, width]), // troca da escala
+     y = d3.scaleLinear().range([height, 0]);
+
+    var g = svg.append("g")
+            .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+        x.domain(d3.extent(data, d => d.NotaLc)) // troca de domínio e casting para float
+        y.domain([0, d3.max(data, function(d) { return d.NotaRedacao; })]);
+
+        g.append("g")
+         .attr("transform", "translate(0," + height + ")")
+         .call(d3.axisBottom(x))
+         .append("text")
+         .attr("y", height - 250)
+         .attr("x", width - 100)
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Notas em Linguagems e Codigos");
+
+        g.append("g")
+         .call(d3.axisLeft(y).tickFormat(function(d){
+             return  d;
+         }).ticks(10))
+         .append("text")
+         .attr("transform", "rotate(-90)")
+         .attr("y", 6)
+         .attr("dy", "-5.1em")
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Notas da Redação");
+
+let color = d3.scaleOrdinal(d3.schemeCategory10);
+let attendance_extent = d3.extent(data, d => d.NotaRedacao );
+                let radius_scale = d3.scaleLinear()
+                    .domain(attendance_extent)
+                    .range([1,10]);
+
+      Vis6= g.selectAll("circle")
+         .data(data)
+         .enter().append("circle")
+         .attr("class", "circle")
+         .style("fill",function (d) { return color(d.CorRaca); })
+         .attr("cx", function(d) { return x(+d.NotaLc); }) // casting para float
+         .attr("cy", function(d) { return y(d.NotaRedacao); })
+         .attr("r", d => radius_scale(d.NotaRedacao))
+         .attr("width",  function(d) { return width - x(d.NotaLc); })
+         
+         .attr("height", function(d) { return height - y(d.NotaRedacao); })
+
+         .on("click", function(e, d) {          
+            console.log(d.UfResidencia)
+            handleSelection(d.UfResidencia) 
+        });
+
+
+
+   }
 
     function setupVis(data)
     {
+       rawdata=data;
         console.log(data)
 vis2(data)
 vis3(data)
 vis4(data)
-         
+      vis6(data)   
     }
 
 </script>
@@ -257,11 +336,12 @@ vis4(data)
 
     <h1>Qual o Desempenho dos participantes do Exame nacional do ensino médio na Redação?  </h1>
 <svg id="p1" width="600" height="500"></svg>
- <svg id="legenda" height=300 width=450></svg>
+ 
 <svg id="p2" width="600" height="500"></svg>
 <svg id="p3" width="600" height="500"></svg>
 
-
+<svg id="p6" width="600" height="500"></svg>
+<svg id="legenda" height=300 width=450></svg>
  
 
 <script type="text/javascript">

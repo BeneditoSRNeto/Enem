@@ -121,6 +121,8 @@ Svg.selectAll("#legenda")
    }
     function vis2(data){
 
+    d3.select("#p2").selectAll("*").remove();
+
      var svg = d3.select("#p2"),
         margin = 200,
         width = svg.attr("width") - margin,
@@ -184,6 +186,8 @@ Svg.selectAll("#legenda")
 
 
    function vis3(data){
+    
+    d3.select("#p3").selectAll("*").remove();
 
      var svg = d3.select("#p3"),
         margin = 200,
@@ -248,6 +252,8 @@ let color = d3.scaleOrdinal(d3.schemeCategory10);
 
 function vis5(data){
 
+     d3.select("#p5").selectAll("*").remove();
+     
      var svg = d3.select("#p5"),
         margin = 200,
         width = svg.attr("width") - margin,
@@ -310,7 +316,10 @@ let color = d3.scaleOrdinal(d3.schemeCategory10);
 
 
    function vis6(data){
-var svg = d3.select("#p6"),
+    
+    d3.select("#p6").selectAll("*").remove();
+
+    var svg = d3.select("#p6"),
         margin = 200,
         width = svg.attr("width") - margin,
         height = svg.attr("height") - margin;
@@ -384,7 +393,7 @@ let color = d3.scaleOrdinal(d3.schemeCategory10);
         let label = d3.select("#label");
 
         let min = 2017, 
-            max = d3.max(data,d => d.Anos) ;
+            max = d3.max(data,d => d.Ano) ;
         slider
             .attr("min", min)
             .attr("max", 2019)
