@@ -369,19 +369,13 @@ let attendance_extent = d3.extent(data, d => d.NotaMt );
        .attr("font-size", "24px")
        .text("Desempenho na Redação X Linguagens")
 
-    var x = d3.scaleBand().range([0, width]).padding(0.4),
+    var x = d3.scaleLinear().range([0, width]), // troca da escala
      y = d3.scaleLinear().range([height, 0]);
 
     var g = svg.append("g")
             .attr("transform", "translate(" + 100 + "," + 100 + ")");
 
-
-        x.domain(data.map(function(d) { return d.NotaLc; }));
-
-       // x.domain(data.map(function(d) { return +d.UfResidencia; }) );
-       // console.log(data.map(function(d) { return +d.NotaCn; }) ) 
-
-
+        x.domain(d3.extent(data, d => +d.NotaLc)) // troca de domínio e casting para float
         y.domain([0, d3.max(data, function(d) { return d.NotaRedacao; })]);
 
         g.append("g")
@@ -417,7 +411,7 @@ let attendance_extent = d3.extent(data, d => d.NotaMt );
          .enter().append("circle")
          .attr("class", "circle")
          .style("fill",function (d) { return color(d.CorRaca); })
-         .attr("cx", function(d) { return x(d.NotaLc); })
+         .attr("cx", function(d) { return x(+d.NotaLc); }) // casting para float
          .attr("cy", function(d) { return y(d.NotaRedacao); })
          .attr("r", d => radius_scale(d.NotaMt))
          .attr("width", x.bandwidth())
