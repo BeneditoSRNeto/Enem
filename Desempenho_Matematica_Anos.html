@@ -74,7 +74,7 @@ Svg.selectAll("#legenda")
        .attr("x", 50)
        .attr("y", 50)
        .attr("font-size", "24px")
-       .text("Legenda ")
+       .text("Cor/Raça dos participantes ")
 
 }
 //__________________________________________________________________
@@ -361,11 +361,11 @@ let attendance_extent = d3.extent(data, d => d.Idade );
          .attr("class", "circle")
          .style("fill",function (d) { return color(d.CorRaca); })
          .attr("cx", function(d) { return x(+d.NotaCn); }) // casting para float
-         .attr("cy", function(d) { return y(d.NotaMt); })
+         .attr("cy", function(d) { return y(+d.NotaMt); })
          .attr("r", d => radius_scale(d.Idade))
-         .attr("width", function(d) { return width - x(d.NotaCn); })
+         .attr("width", function(d) { return width - x(+d.NotaCn); })
          
-         .attr("height", function(d) { return height - y(d.NotaMt); })
+         .attr("height", function(d) { return height - y(+d.NotaMt); })
          .on("click", function(e, d) {          
             handleSelection(d.UfResidencia) // delegate event
       });

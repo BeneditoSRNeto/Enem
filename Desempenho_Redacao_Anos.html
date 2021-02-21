@@ -54,7 +54,7 @@ Svg.selectAll("#legenda")
        .attr("x", 50)
        .attr("y", 50)
        .attr("font-size", "24px")
-       .text("Legenda ")
+       .text("Cor/Raça dos participantes ")
 
 }
 //__________________________________________________________________
@@ -305,10 +305,10 @@ function vis6(data){
          .text("Notas da Redação");
 
 let color = d3.scaleOrdinal(d3.schemeCategory10);
-let attendance_extent = d3.extent(data, d => d.NotaRedacao );
+let attendance_extent = d3.extent(data, d => d.Idade );
                 let radius_scale = d3.scaleLinear()
                     .domain(attendance_extent)
-                    .range([1,10]);
+                    .range([1,20]);
 
       Vis6= g.selectAll("circle")
          .data(data)
@@ -316,14 +316,14 @@ let attendance_extent = d3.extent(data, d => d.NotaRedacao );
          .attr("class", "circle")
          .style("fill",function (d) { return color(d.CorRaca); })
          .attr("cx", function(d) { return x(+d.NotaLc); }) // casting para float
-         .attr("cy", function(d) { return y(d.NotaRedacao); })
-         .attr("r", d => radius_scale(d.NotaRedacao))
-         .attr("width",  function(d) { return width - x(d.NotaLc); })
+         .attr("cy", function(d) { return y(+d.NotaRedacao); })
+         .attr("r", d => radius_scale(d.Idade))
+         .attr("width",  function(d) { return width - x(+d.NotaLc); })
          
-         .attr("height", function(d) { return height - y(d.NotaRedacao); })
+         .attr("height", function(d) { return height - y(+d.NotaRedacao); })
 
          .on("click", function(e, d) {          
-            console.log(d.UfResidencia)
+           // console.log(d.UfResidencia)
             handleSelection(d.UfResidencia) 
         });
 
