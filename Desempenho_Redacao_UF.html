@@ -211,7 +211,7 @@ var histogram = d3.histogram()
 
  var bins = histogram(data);
 
- console.log("bins_________"+bins.x0 +" bins 2" +bins.x1)
+ 
 //__________________________________
 var y = d3.scaleLinear()
       .range([height, 0]);
@@ -239,31 +239,8 @@ var tooltip = d3.select("#my_dataviz")
     .style("border-radius", "5px")
     .style("padding", "10px")
 
-  // A function that change this tooltip when the user hover a point.
-  // Its opacity is set to 1: we can now see it. Plus it set the text and position of tooltip depending on the datapoint (d)
-  var showTooltip = function(d) {
-    tooltip
-      .transition()
-      .duration(100)
-      .style("opacity", 1)
-    tooltip
-      .html("Range: " + d.x0 + " - " + d.x1)
-      .style("left", (d3.mouse(this)[0]+20) + "px")
-      .style("top", (d3.mouse(this)[1]) + "px")
-  }
-  var moveTooltip = function(d) {
-    tooltip
-    .style("left", (d3.mouse(this)[0]+20) + "px")
-    .style("top", (d3.mouse(this)[1]) + "px")
-  }
-  // A function that change this tooltip when the leaves a point: just need to set opacity to 0 again
-  var hideTooltip = function(d) {
-    tooltip
-      .transition()
-      .duration(100)
-      .style("opacity", 0)
-  }
-let color = d3.scaleOrdinal(d3.schemeCategory10);
+  
+
   // append the bar rectangles to the svg element
  g.selectAll("rect")
       .data(bins)
@@ -275,9 +252,7 @@ let color = d3.scaleOrdinal(d3.schemeCategory10);
         .attr("height", function(d) { return height - y(+d.length); })
         .style("fill", "teal")
         // Show tooltip on hover
-        .on("mouseover", showTooltip )
-        .on("mousemove", moveTooltip )
-        .on("mouseleave", hideTooltip )
+        
 
 
 
