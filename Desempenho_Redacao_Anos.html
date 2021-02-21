@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .bar {
+            fill: steelblue;
+        }
+
+        .highlight {
+            fill: orange;
+        }
+</style>
+    <script type="text/javascript" src="../d3.js"></script>
+<script>
+    var keys = [ "Branca", "Preta", "Parda", "Amarela","Indígena ","Não declarado"]
+let mapPaths,Vis2,Vis3, Vis6,rawdata;
+
+
+
+function vis4(data){
+let color = d3.scaleOrdinal(d3.schemeCategory10);
+// select the svg area
+var Svg = d3.select("#legenda")
+
+// create a list of keys
+
+// Usually you have a color scale in your chart already
+
+
+// Add one dot in the legend for each name.
+Svg.selectAll("#legenda")
+  .data(keys)
+  .enter()
+  .append("circle")
+    .attr("cx", 100)
+    .attr("cy", function(d,i){ return 100 + i*25}) // 100 is where the first dot appears. 25 is the distance between dots
+    .attr("r", 7)
+    .style("fill", function(d){ return color(d)})
+
+// Add one dot in the legend for each name.
+Svg.selectAll("#legenda")
+  .data(keys)
+  .enter()
+  .append("text")
+    .attr("x", 120)
+    .attr("y", function(d,i){ return 100 + i*25}) // 100 is where the first dot appears. 25 is the distance between dots
+    .style("fill", function(d){ return color(d)})
+    .text(function(d){ return d})
+    .attr("text-anchor", "left")
+    .style("alignment-baseline", "middle")
+
+     Svg.append("text")
+       .attr("transform", "translate(100,0)")
+       .attr("x", 50)
+       .attr("y", 50)
+       .attr("font-size", "24px")
+       .text("Legenda ")
+
+}
+//__________________________________________________________________
+
+
+
+   function vis1(data){
+var svg = d3.select("#p1"),
+        margin = 200,
+        width = svg.attr("width") - margin,
+        height = svg.attr("height") - margin;
+
+    svg.append("text")
+       .attr("transform", "translate(100,0)")
+       .attr("x", 50)
+       .attr("y", 50)
+       .attr("font-size", "24px")
+       .text("Mapa por UF ")
+
+    
+
+let projection = d3.geoMercator()
+                .scale(450)
+                .center([-50, -17]); // center of projection
+
+        let path = d3.geoPath().projection(projection);
+
+        mapPaths = svg.selectAll("path")
+            .data(data.features) // draw feature by feature, do not load all feature collection
+            .join("path")
+                .attr("d", d => path(d)) // draw feature by feature
+                .attr("fill", "#deebf7")
+                .attr("stroke", "black")
+                .attr("stroke-width", 1)
+                .on("click", function(e, d) {
+                    handleSelection(d.properties.UF_05);
+                
+
+
+                });
+
+   }
+    function vis2(data){
+
+d3.select("#p2").selectAll("*").remove();
+     var svg = d3.select("#p2"),
+        margin = 200,
+        width = svg.attr("width") - margin,
+        height = svg.attr("height") - margin;
+
+    svg.append("text")
+       .attr("transform", "translate(100,0)")
+       .attr("x", 50)
+       .attr("y", 50)
+       .attr("font-size", "24px")
+       .text("Desempenho por UF")
+
+    var x = d3.scaleBand().range([0, width]).padding(0.4),
+        y = d3.scaleLinear().range([height, 0]);
+
+    var g = svg.append("g")
+            .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+
+        x.domain(data.map(function(d) { return d.UfResidencia; }));
+        y.domain([0, d3.max(data, function(d) { return d.NotaRedacao; })]);
+
+        g.append("g")
+         .attr("transform", "translate(0," + height + ")")
+         .call(d3.axisBottom(x))
+         .append("text")
+         .attr("y", height - 250)
+         .attr("x", width - 100)
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("UF");
+
+        g.append("g")
+         .call(d3.axisLeft(y).tickFormat(function(d){
+             return  d;
+         }).ticks(10))
+         .append("text")
+         .attr("transform", "rotate(-90)")
+         .attr("y", 6)
+         .attr("dy", "-5.1em")
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Notas da NotaRedação");
+
+let color = d3.scaleOrdinal(d3.schemeCategory10);
+
+       Vis2=g.selectAll(".bar")
+         .data(data)
+         .enter().append("rect")
+         .attr("class", "bar")
+         .style("fill","teal")
+         .attr("x", function(d) { return x(d.UfResidencia); })
+         .attr("y", function(d) { return y(d.NotaRedacao); })
+         .attr("width", x.bandwidth())
+         .attr("height", function(d) { return height - y(d.NotaRedacao); })
+         //.ease(d3.easeLinear)
+        .on("click", function(e, d) {          
+            handleSelection(d.UfResidencia) // delegate event
+      })
+        // .delay(function (d, i) {return i * 10; })
+         ;
+    
+
+   }
+
+
+   function vis3(data){
+d3.select("#p3").selectAll("*").remove();
+     // repetir isso nos outros
+        
+
+        var svg = d3.select("#p3"),
+            margin = 200,
+            width = svg.attr("width") - margin,
+            height = svg.attr("height") - margin;
+
+        svg.append("text")
+        .attr("transform", "translate(100,0)")
+        .attr("x", 50)
+        .attr("y", 50)
+        .attr("font-size", "24px")
+        .text("Histograma das Notas da redação ")
+
+
+var x = d3.scaleLinear()
+      .domain([0, d3.max(data, function(d) { return +d.NotaRedacao })])     // can use this instead of 1000 to have the max of data: d3.max(data, function(d) { return +d.price })
+      .range([0, width]);
+
+  var g = svg.append("g")
+  .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+  g.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x))
+       .append("text")
+            .attr("y", height - 250)
+            .attr("x", width - 100)
+            .attr("text-anchor", "end")
+            .attr("stroke", "black")
+            .text("Notas");
+
+
+//___________________________
+var histogram = d3.histogram()
+      .value(function(d) { return +d.NotaRedacao; })   // I need to give the vector of value
+      .domain(x.domain())  // then the domain of the graphic
+      .thresholds(x.ticks(20)); // then the numbers of bins
+
+
+ var bins = histogram(data);
+
+ 
+//__________________________________
+var y = d3.scaleLinear()
+      .range([height, 0]);
+
+      y.domain([0, d3.max(bins, function(d) { return +d.length })]);   // d3.hist has to be called before the Y axis obviously\\
+  g.append("g")
+             .call(d3.axisLeft(y))
+            
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", "-5.1em")
+            .attr("text-anchor", "end")
+            .attr("stroke", "black")
+            .text("Contagem");
+
+
+
+var tooltip = d3.select("#my_dataviz")
+    .append("div")
+    .style("opacity", 0)
+    .attr("class", "tooltip")
+    .style("background-color", "black")
+    .style("color", "white")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+
+  
+
+  // append the bar rectangles to the svg element
+ g.selectAll("rect")
+      .data(bins)
+      .enter()
+      .append("rect")
+        .attr("x", 1)
+        .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
+        .attr("width", function(d) { return x(d.x1) - x(d.x0) -1 ; })
+        .attr("height", function(d) { return height - y(+d.length); })
+        .style("fill", "teal")
+        // Show tooltip on hover
+        
+
+
+
+   }
+
+function vis6(data){
+
+  d3.select("#p6").selectAll("*").remove();
+ var svg = d3.select("#p6"),
+        margin = 200,
+        width = svg.attr("width") - margin,
+        height = svg.attr("height") - margin;
+
+    svg.append("text")
+       .attr("transform", "translate(100,0)")
+       .attr("x", 50)
+       .attr("y", 50)
+       .attr("font-size", "24px")
+       .text("Desempenho na Redação X Linguagens")
+
+    var x = d3.scaleLinear().range([0, width]), // troca da escala
+     y = d3.scaleLinear().range([height, 0]);
+
+    var g = svg.append("g")
+            .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+        x.domain(d3.extent(data, d => d.NotaLc)) // troca de domínio e casting para float
+        y.domain([0, d3.max(data, function(d) { return d.NotaRedacao; })]);
+
+        g.append("g")
+         .attr("transform", "translate(0," + height + ")")
+         .call(d3.axisBottom(x))
+         .append("text")
+         .attr("y", height - 250)
+         .attr("x", width - 100)
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Notas em Linguagems e Codigos");
+
+        g.append("g")
+         .call(d3.axisLeft(y).tickFormat(function(d){
+             return  d;
+         }).ticks(10))
+         .append("text")
+         .attr("transform", "rotate(-90)")
+         .attr("y", 6)
+         .attr("dy", "-5.1em")
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Notas da Redação");
+
+let color = d3.scaleOrdinal(d3.schemeCategory10);
+let attendance_extent = d3.extent(data, d => d.NotaRedacao );
+                let radius_scale = d3.scaleLinear()
+                    .domain(attendance_extent)
+                    .range([1,10]);
+
+      Vis6= g.selectAll("circle")
+         .data(data)
+         .enter().append("circle")
+         .attr("class", "circle")
+         .style("fill",function (d) { return color(d.CorRaca); })
+         .attr("cx", function(d) { return x(+d.NotaLc); }) // casting para float
+         .attr("cy", function(d) { return y(d.NotaRedacao); })
+         .attr("r", d => radius_scale(d.NotaRedacao))
+         .attr("width",  function(d) { return width - x(d.NotaLc); })
+         
+         .attr("height", function(d) { return height - y(d.NotaRedacao); })
+
+         .on("click", function(e, d) {          
+            console.log(d.UfResidencia)
+            handleSelection(d.UfResidencia) 
+        });
+
+
+
+   }
+
+    function setupVis(data)
+    {
+       rawdata=data;
+        console.log(data)
+vis2(data)
+vis3(data)
+vis4(data)
+      vis6(data)  
+
+
+let slider = d3.select("#filter_slider");
+        let label = d3.select("#label");
+
+        let min = 2017, 
+            max = d3.max(data,d => d.Ano) ;
+        slider
+            .attr("min", min)
+            .attr("max", 2019)
+            .attr("value", 1)
+            .attr("step", 1)
+            .on("input", function(e, d) {
+                label.text(this.value) // use `this` on the place of slider 
+                
+                // corrigido o valor e o cast
+                let dataFiltered = data.filter(d => d.Ano == +this.value); // filter using value
+               
+                vis2(dataFiltered)
+vis3(dataFiltered)
+vis4(dataFiltered)
+      vis6(dataFiltered) 
+                
+                // get names from filtered data and update features
+            })
+      
+
+    }
+function handleSelection(key) {
+        let color = d3.scaleOrdinal(d3.schemeCategory10);
+        // reset visual display  "#deebf7"
+        mapPaths.style("fill","#deebf7");
+      // Vis3.style("fill",function (d) { return color(d.CorRaca); });           
+       Vis2.style("fill","teal");
+      // Vis6.style("fill",function (d) { return color(d.CorRaca);  });
+       
+
+        // using filter it is possible to get the selection by the key
+        mapPaths.filter(d => d.properties.UF_05 === key).style("fill","red");
+      Vis2.filter(d => d.UfResidencia === key).style("fill","red");
+       // Vis3.filter(d => d.UfResidencia === key).style("fill","red");
+      // Vis6.filter(d => d.UfResidencia === key).style("fill","red");
+       let dataFiltered = rawdata.filter(d => d.UfResidencia == key); // filter using value
+                vis6(dataFiltered);
+                vis3(dataFiltered);
+    } 
+
+</script>
+</head>
+<body>
+
+    <h1>Qual o Desempenho dos participantes do Exame nacional do ensino médio na Redação?  </h1>
+<div id="filter_container">
+        <label>Anos de Aplicação: <input type="range" id="filter_slider"/> </label>
+        <p id="label"> </p>
+    </div>
+<svg id="p1" width="600" height="500"></svg>
+ 
+<svg id="p2" width="600" height="500"></svg>
+<svg id="p3" width="600" height="500"></svg>
+
+<svg id="p6" width="600" height="500"></svg>
+<svg id="legenda" height=300 width=450></svg>
+ 
+
+<script type="text/javascript">
+      d3.json("uf.json")
+            .then(data => {
+                vis1(data)
+
+            })
+            .catch(err => {console.log(err)})
+
+
+     d3.dsv(";", "ENEM_full.csv")
+            .then(setupVis)
+            .catch(err => {console.log(err)})
+</script>
+</body>
+</html>
